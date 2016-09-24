@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<script src = "//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<style>
+
+#outterCircle {
+  border: 20px solid #343436;
+  background-color: #E1E4E2;
+  /*padding-bottom: 60px;
+  padding-top: 50px;*/
+  border-radius: 100%;
+  /*width: 560px;
+  height: 570px;
+  710px;
+  padding-right: 55px;*/
+  padding: 4%;/*40px;*/
+  position:absolute; /*setting the outter circle div to have an absolute position and the inner elements to relative ensures that the inner elements get encircled by the outter circle */
+  left: 33%;
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+.active {
+  background-color: #343436;
+  color: white;
+}
+
+.box {
+  /*height: 170px;*/
+  /*width: 190px;*/
+  /*height: 150px;
+  width: 170px;*/
+  padding: 90px; /*setting height to 0 and padding to 90px enables the gameboxes to be responsive */
+  height: 0;
+  width: 0;
+  border: 5px solid #343436;
+  /*margin-top: 10px;*/
+  display: inline-block; /*need this because i'm not using bootstrap columns for boxes */
+  margin-right: 35px;
+  position: relative;
+  left: 4.27%;
+}
+
+.gamebox1 {
+  background-color: #00a74a;
+  border-radius: 100% 10px 10px 10px;
+  /*border-radius: 710px 10px 10px 10px;*/
+}
+
+.box1Lit {
+  background-color: #66AB8C;
+}
+
+.gamebox2 {
+  background-color: #E62117;
+  border-radius: 10px 100% 10px 10px;
+}
+
+.box2Lit {
+  background-color: #FA7C92;
+}
+
+#middle {
+  position: relative;
+  /*left: 35%;
+  display: inline-block;*/
+  left: 14%;
+  font-family: 'Palanquin Dark', sans-serif;
+}
+
+#moveCounter {
+  /*height: 30px;*/
+  margin-left: 30px;
+  margin-top: 15px;
+  margin-bottom: 15px;  
+  font-family: 'Wallpoet', cursive;
+  font-size: 15px;
+  background-color: #343436;
+  color: #E62117;
+  padding: 1%;
+}
+
+#moveCnt {  
+  float: left;
+  position: relative;
+  top: 5%;
+}
+
+#start {
+  display: inline-block;
+} 
+
+#strictDiv {
+  margin-top: 15px;
+}
+
+.strictBtn {
+  border-style: none;
+}
+
+.gamebox3 {
+  background-color: #FFD523;
+  border-radius: 10px 10px 10px 100%;
+}
+
+.box3Lit {
+  background-color: #FEF7C0;
+}
+
+.gamebox4 {
+  background-color: #094A8F;
+  border-radius: 10px 10px 100% 10px;
+}
+
+.box4Lit {
+  background-color: #6EC4DB;
+}
+
+.btn {
+  height: 40px;
+  margin-top: 15px;
+  background-color: #00a74a;
+  border: 1px solid;
+}
+
+</style>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+</head>
+
+<body>
+<link href="https://fonts.googleapis.com/css?family=Palanquin+Dark|Wallpoet" rel="stylesheet">
+  <div id="outterCircle">
+    
+  <div class="row" id="firstRow">
+    <div class="box gamebox1" id="1"></div>
+    <div class=" box gamebox2" id="2"></div>
+  </div>
+    
+  <div class="row" id="middle">
+    <button class="btn col-md-2 col-xs-2" id="start">Start</button>
+    <div class="col-md-1 col-xs-1" id="moveCounter">
+    </div>
+    <div class="col-md-6 col-xs-6" id="strictDiv">
+    <p class="col-md-4 col-md-offset-1 col-xs-4" id="strictText">Strict Mode</p>
+      <button id="strictOn" class"strictBtn">On</button>
+      <button id="strictOff" class="stricBtn">Off</button>
+    </div>
+  </div>
+    
+  <div class="row">
+    <div class="box gamebox3" id="3"></div>
+    <div class="box gamebox4" id="4"></div>
+  </div>
+    
+  </div>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+  var compMovesArr = [];
+  var compMovesNum = 0;
+  var playerMovesArr = [];
+  var idStr;
+  var strictMode = true;
+  var allMovesCorrect = true;
+  var simonSoundUrl = "https://s3.amazonaws.com/freecodecamp/simonSound";
+  
+  $("#strictOn").click(function(){ //turn on strict mode
+    strictMode = true;
+    $("#strictOn").addClass("active");
+    $("#strictOff").removeClass("active");
+  });
+  
+  $("#strictOff").click(function(){ //turn off strict mode
+    strictMode = false;
+    $("#strictOff").addClass("active");
+    $("#strictOn").removeClass("active");
+  });
+  
+  function endGame(){ //clear all arrays and reset settings
+    playerMovesArr = [];
+    compMovesArr = [];
+    compMovesNum = 0;
+    allMovesCorrect = true;
+    strictMode = false;
+  }
+  
+  function lightsUpPreviousCompSteps(arr, a){ 
+    window.setTimeout(function(){
+      $(".gamebox" + arr[a]).addClass("box" + arr[a] + "Lit"); //change the color of the gamebox div to make it look lit
+      new Audio(simonSoundUrl + arr[a] + ".mp3").play(); //play a noise each time a box gets lit
+      lightsUpPreviousCompSteps(arr, a+1); //call the function again for the next element in the compMovesArr
+    }, 2000);
+    window.setTimeout(function(){
+       $(".gamebox" + arr[a]).removeClass("box" + arr[a] + "Lit");
+      }, 4000); //after 4 seconds, the Lit class gets removed, returning the color to normal
+  }
+  
+  function checkPlayerClicks(arr1, arr2, a, callback){
+    if(arr1[arr1.length-1] !== arr2[arr1.length-1]){
+      alert("Wrong button!");
+      allMovesCorrect = false;
+      if(strictMode === false){
+        lightsUpPreviousCompSteps(arr2, a); //if strictMode is off, the previous steps get lit up if the player clicked incorrectly
+      } else if(strictMode === true){
+        alert("You will now start over from the beginning because you're in Strict Mode."); //if strictMode is on, player has to start from beginning with new sequence
+        endGame();
+        callback();
+      }
+    }
+  }
+  
+  function playerClick(arr1, arr2, a, callback){
+    $(".box").unbind().click(function(){ //the unbind is crucial for removing previously attached click handlers (prevents the function from repeating itself several times after 1 click)
+      var idStr = $(this).attr("id");
+      new Audio(simonSoundUrl + idStr + ".mp3").play(); //every time player clicks button, it makes noise
+      arr1.push(parseInt(idStr));   
+      checkPlayerClicks(arr1, arr2, a, callback); //call function to check if player's clicks are right
+      if(arr1.length === arr2.length && allMovesCorrect === true){
+        callback();
+      } else if(allMovesCorrect === false){ //this is for non-strict mode
+        arr1 = []; //empty the playerMove array so that player can try again
+        allMovesCorrect = true;
+      }
+    });
+  }
+  
+  function computerTurn(){ //function runs each time a new turn for the computer occurs
+    playerMovesArr = []; //declaring a new playerMovesArr might be causing the new arrays to appear in the alerts
+    var latestTurn = Math.ceil(Math.random() * 4);
+    compMovesArr.push(latestTurn); //computer randomly generates its next step
+    compMovesNum += 1;
+    $("#moveCounter").html("<p id='moveCnt'>" + compMovesNum + "</p>");
+    lightsUpPreviousCompSteps(compMovesArr, 0); //light up the computer's sequence
+    playerClick(playerMovesArr, compMovesArr, 0, computerTurn);
+  }
+    
+  $("#start").click(function(){
+    endGame();
+    computerTurn();
+    if(compMovesNum === 20){
+      alert("You Win!!!");
+      endGame();
+      return;
+    }
+  }); 
+
+});
+
+</script>
+</body>
+</html>
